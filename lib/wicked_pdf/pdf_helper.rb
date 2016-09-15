@@ -19,27 +19,33 @@ class WickedPdf
 
       base.class_eval do
         after_action :clean_temp_files
+
+        alias_method :render_without_wicked_pdf, :render
+        alias_method :render, :render_with_wicked_pdf
+
+        alias_method :render_to_string_without_wicked_pdf, :render_to_string
+        alias_method :render_to_string, :render_to_string_with_wicked_pdf
       end
     end
 
-    def render(options = nil, *args, &block)
+    def render_with_wicked_pdf(options = nil, *args, &block)
       if options.is_a?(Hash) && options.key?(:pdf)
         log_pdf_creation
         options[:basic_auth] = set_basic_auth(options)
         make_and_send_pdf(options.delete(:pdf), (WickedPdf.config || {}).merge(options))
       else
-        super(options, *args, &block)
+        render_without_wicked_pdf(options, *args, &block)
       end
     end
 
-    def render_to_string(options = nil, *args, &block)
+    def render_to_string_with_wicked_pdf(options = nil, *args, &block)
       if options.is_a?(Hash) && options.key?(:pdf)
         log_pdf_creation
         options[:basic_auth] = set_basic_auth(options)
         options.delete :pdf
         make_pdf((WickedPdf.config || {}).merge(options))
       else
-        super(options, *args, &block)
+        render_to_string_without_wicked_pdf(options, *args, &block)
       end
     end
 
