@@ -17,7 +17,7 @@ class WickedPdf
 
       def render_with_wicked_pdf(options = nil, *args, &block)
         if use_wicked?(options)
-          _render_pdf(options)
+          wicked_render(options)
         else
           render_without_wicked_pdf(options, *args, &block)
         end
@@ -25,7 +25,7 @@ class WickedPdf
 
       def render_to_string_with_wicked_pdf(options = nil, *args, &block)
         if use_wicked?(options)
-          _wicked_render_to_string(options)
+          wicked_render_to_string(options)
         else
           render_to_string_without_wicked_pdf(options, *args, &block)
         end
@@ -47,7 +47,7 @@ class WickedPdf
 
       def render(options = nil, *args, &block)
         if use_wicked?(options)
-          _render_pdf(options)
+          wicked_render(options)
         else
           super(options, *args, &block)
         end
@@ -55,7 +55,7 @@ class WickedPdf
 
       def render_to_string(options = nil, *args, &block)
         if use_wicked?(options)
-          _wicked_render_to_string(options)
+          wicked_render_to_string(options)
         else
           super(options, *args, &block)
         end
@@ -69,13 +69,13 @@ class WickedPdf
         options.is_a?(Hash) && options.key?(:pdf)
       end
 
-      def _wicked_render(options)
+      def wicked_render(options)
         log_pdf_creation
         options[:basic_auth] = set_basic_auth(options)
         make_and_send_pdf(options.delete(:pdf), (WickedPdf.config || {}).merge(options))
       end
 
-      def _wicked_render_to_string(options)
+      def wicked_render_to_string(options)
         log_pdf_creation
         options[:basic_auth] = set_basic_auth(options)
         options.delete :pdf
