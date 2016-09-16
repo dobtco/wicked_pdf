@@ -6,9 +6,9 @@ class WickedPdf
         # as the result of adding other gems.
         return if base != ActionController::Base
 
-        base.include(Helpers)
-
         base.class_eval do
+          include Helpers
+
           alias_method_chain :render, :wicked_pdf
           alias_method_chain :render_to_string, :wicked_pdf
           after_filter :clean_temp_files
@@ -38,9 +38,9 @@ class WickedPdf
         # as the result of adding other gems.
         return if base != ActionController::Base
 
-        base.include(Helpers)
-
         base.class_eval do
+          include Helpers
+
           after_action :clean_temp_files
         end
       end
