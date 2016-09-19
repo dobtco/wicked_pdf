@@ -68,10 +68,14 @@ class PdfHelperTest < ActionController::TestCase
       ActionController::Base.prepend(SomePatch)
       ActionController::Base.prepend(::WickedPdf::PdfHelper)
 
-      # test that calling render does not trigger infinite loop
-      ac = ActionController::Base.new
-
       begin
+        # test that wicked's render method is actually called
+        ac = ActionController::Base.new
+        ac.expects(:render_with_wicked_pdf)
+        ac.render(:cats)
+
+        # test that calling render does not trigger infinite loop
+        ac = ActionController::Base.new
         assert_equal [:base, :patched], ac.render(:cats)
       rescue SystemStackError
         assert_equal true, false # force spec failure
@@ -79,11 +83,6 @@ class PdfHelperTest < ActionController::TestCase
         ActionController.send(:remove_const, :Base)
         ActionController.const_set(:Base, OriginalBase)
       end
-
-      # test that wicked's render method is actually called
-      ac = ActionController::Base.new
-      ac.expects(:render_with_wicked_pdf)
-      ac.render(:cats)
     end
   end
 end
