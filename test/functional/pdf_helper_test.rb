@@ -48,6 +48,18 @@ class PdfHelperTest < ActionController::TestCase
   test 'should not interfere with already prepended patches' do
     # Emulate railtie
     if Rails::VERSION::MAJOR >= 5
+      # this spec tests the following:
+      # if another gem prepends a render method to ActionController::Base
+      # before wicked_pdf does, does calling render trigger an infinite loop?
+      # this spec fails with 6392bea1fe3a41682dfd7c20fd9c179b5a758f59 because PdfHelper
+      # aliases the render method prepended by the other gem to render_without_pdf, then
+      # base_evals its own definition of render, which calls render_with_pdf -> render_without_pdf.
+      # If the other gem uses the prepend inhertinance pattern (calling super instead of aliasing),
+      # when it calls super it calls the base_eval'd version of render instead of going up the
+      # inheritance chain, causing an infinite loop.
+
+      # This fiddling with consts is required to get around the fact that PdfHelper checks
+      # that it is being prepended to ActionController::Base
       OriginalBase = ActionController::Base
       ActionController.send(:remove_const, :Base)
       ActionController.const_set(:Base, ActionControllerMock::Base)
@@ -56,16 +68,22 @@ class PdfHelperTest < ActionController::TestCase
       ActionController::Base.prepend(SomePatch)
       ActionController::Base.prepend(::WickedPdf::PdfHelper)
 
+      # test that calling render does not trigger infinite loop
       ac = ActionController::Base.new
 
       begin
-        assert_equal ac.render(:cats), [:base, :patched]
+        assert_equal [:base, :patched], ac.render(:cats)
       rescue SystemStackError
         assert_equal true, false # force spec failure
       ensure
         ActionController.send(:remove_const, :Base)
         ActionController.const_set(:Base, OriginalBase)
       end
+
+      # test that wicked's render method is actually called
+      ac = ActionController::Base.new
+      ac.expects(:render_with_wicked_pdf)
+      ac.render(:cats)
     end
   end
 end

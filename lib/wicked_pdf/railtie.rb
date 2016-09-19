@@ -9,7 +9,7 @@ class WickedPdf
 
       class WickedRailtie < Rails::Railtie
         initializer 'wicked_pdf.register' do |_app|
-          ActionController::Base.send :prepend, PdfHelper::RenderPatch
+          ActionController::Base.send :prepend, PdfHelper
           ActionView::Base.send :include, WickedPdfHelper::Assets
         end
       end
@@ -18,7 +18,7 @@ class WickedPdf
 
       class WickedRailtie < Rails::Railtie
         initializer 'wicked_pdf.register' do |_app|
-          ActionController::Base.send :include, PdfHelper::RenderWithWicked
+          ActionController::Base.send :include, PdfHelper
           ActionView::Base.send :include, WickedPdfHelper::Assets
         end
       end
@@ -27,7 +27,7 @@ class WickedPdf
 
       class WickedRailtie < Rails::Railtie
         initializer 'wicked_pdf.register' do |_app|
-          ActionController::Base.send :include, PdfHelper::RenderWithWicked
+          ActionController::Base.send :include, PdfHelper
           if Rails::VERSION::MINOR > 0 && Rails.configuration.assets.enabled
             ActionView::Base.send :include, WickedPdfHelper::Assets
           else
@@ -39,7 +39,7 @@ class WickedPdf
     elsif Rails::VERSION::MAJOR == 2
 
       unless ActionController::Base.instance_methods.include? 'render_with_wicked_pdf'
-        ActionController::Base.send :include, PdfHelper::RenderWithWicked
+        ActionController::Base.send :include, PdfHelper
       end
       unless ActionView::Base.instance_methods.include? 'wicked_pdf_stylesheet_link_tag'
         ActionView::Base.send :include, WickedPdfHelper
