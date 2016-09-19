@@ -34,6 +34,7 @@ class WickedPdf
       if options.is_a?(Hash) && options.key?(:pdf)
         log_pdf_creation
         options[:basic_auth] = set_basic_auth(options)
+        make_and_send_pdf(options.delete(:pdf), (WickedPdf.config || {}).merge(options))
       elsif respond_to?(:render_without_wicked_pdf)
         # support alias_method_chain (module included)
         render_without_wicked_pdf(options, *args, &block)
